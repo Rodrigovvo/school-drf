@@ -19,19 +19,10 @@ class StudentViewSet(viewsets.ModelViewSet):
     serializer_class = StudentSerializer
     permission_classes = (AllowAny,)
 
-    def create(self, request, *args, **kwargs):
-
-        print(request)
-        print(args)
-        print(kwargs)
-        return super().create(request, *args, **kwargs)
-
     def destroy(self, request, *args, **kwargs):
         instance = self.get_object()
-        print(instance)
         if instance:
             instance.is_active = False
-            print(instance)
             instance.save()
         else:
             raise NotFound(_('Student Not Found.'))
@@ -61,19 +52,24 @@ class StudentViewSet(viewsets.ModelViewSet):
         View responsible for search students based on the name and age, with pagination.
         """       
         params = self.request.query_params
+
+        if not params:
+            return self.list(request=request)
         
         serializer_context = {
             'request': request,
         }
-        queryset = Student.objects.filter(
-            Q(
-                Q(nickname__icontains=params.get('name', '')) |
-                Q(first_name__icontains=params.get('name', '')) |
-                Q(last_name__icontains=params.get('name', '')) 
-            ) &
-            Q(course__icontains=params.get('course', '')) &
-            Q(enrollment_number=params.get('enrollment', ''))
-        ).order_by('-modified_at')
+        if params.get('enrollment', None):
+            queryset = Student.objects.filter(enrollment_number=params.get('enrollment'))
+        else: 
+            queryset = Student.objects.filter(
+                Q(
+                    Q(nickname__icontains=params.get('name', '')) |
+                    Q(first_name__icontains=params.get('name', '')) |
+                    Q(last_name__icontains=params.get('name', '')) 
+                ) &
+                Q(course__icontains=params.get('course', ''))
+            ).order_by('-modified_at')
 
         page = self.paginate_queryset(queryset)
         if page is not None:
