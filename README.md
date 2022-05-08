@@ -171,7 +171,7 @@ http://localhost:8000
 #### Delete student
 
 ```http
-  DELETE /recipes/chef/recipe/{enrollment_number}
+  DELETE /api/v1/students/{enrollment_number}
 ```
 * ###### PATH PARAMETERS:
 | Parameter | Type     | Description                       |
