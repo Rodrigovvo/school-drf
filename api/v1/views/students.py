@@ -60,7 +60,10 @@ class StudentViewSet(viewsets.ModelViewSet):
             'request': request,
         }
         if params.get('enrollment', None):
-            queryset = Student.objects.filter(enrollment_number=params.get('enrollment'))
+            queryset = Student.objects.filter(
+                enrollment_number=params.get('enrollment')
+            ).order_by('-modified_at')
+
         else: 
             queryset = Student.objects.filter(
                 Q(
